@@ -1,12 +1,26 @@
-
 import streamlit as st
 from engine import generate_business_package
 
-# Настройка на страницата на Marketor
-st.set_page_config(page_title="Marketor – All-in-One AI Business Hub", page_icon="🚀", layout="centered")
+# Настройка на страницата с новото лого/иконка
+st.set_page_config(
+    page_title="Marketor – AI Business Hub", 
+    page_icon="🚀", 
+    layout="centered"
+)
 
-st.title("🚀 Marketor")
-st.markdown("### Само с **една дума** получаваш готов бизнес пакет за всеки бранш!")
+# Визуално лого в горната част на приложението
+st.markdown(
+    """
+    <div style="text-align: center; padding: 10px 0;">
+        <h1 style="color: #2E86C1; font-size: 2.8rem; margin-bottom: 0;">🚀 M A R K E T O R</h1>
+        <p style="color: #7F8C8D; font-size: 1.1rem; letter-spacing: 2px; margin-top: 5px;">AI BUSINESS HUB</p>
+    </div>
+    <hr style="border: 0; height: 1px; background: #E5E7E9; margin-bottom: 25px;">
+    """, 
+    unsafe_allow_html=True
+)
+
+st.markdown("### 💡 Въведи само **една дума** и получи готов бизнес пакет за всеки бранш!")
 
 # Управление на кредитите в сесията
 if "credits" not in st.session_state:
