@@ -1,9 +1,6 @@
 import os
 
 def generate_business_package(keyword: str) -> dict:
-    """
-    Разширено и ултра-детайлно AI ядро за Marketor: Генерира изчерпателен бизнес наръчник за стартиране и управление.
-    """
     clean_keyword = keyword.strip().capitalize()
     
     package = {
