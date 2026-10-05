@@ -1,7 +1,7 @@
 import streamlit as st
 from engine import generate_business_package
 
-# Настройка на страницата с новото лого/иконка
+# Настройка на страницата на Marketor
 st.set_page_config(
     page_title="Marketor – AI Business Hub", 
     page_icon="🚀", 
@@ -22,48 +22,76 @@ st.markdown(
 
 st.markdown("### 💡 Въведи само **една дума** и получи готов бизнес пакет за всеки бранш!")
 
-# Управление на кредитите в сесията
-if "credits" not in st.session_state:
-    st.session_state.credits = 1 # Стартов безплатен кредит
+# --- СИСТЕМА ЗА ДОСТУП И УПРАВЛЕНИЕ ---
+if "is_admin" not in st.session_state:
+    st.session_state.is_admin = False
 
-# Странично меню за абонамент и EasyPay плащания
-st.sidebar.header("💳 Абонамент и Плащане")
-st.sidebar.markdown("Зареди кредити през **EasyPay**, за да ползваш Marketor неограничено!")
-st.sidebar.info(
-    "**Как да заредиш:**\n"
-    "1. Направи превод в евро (€) по твоето EasyPay.\n"
-    "2. Изпрати ми код или квитанция.\n"
-    "3. Получи код за достъп тук!"
-)
+if "is_subscriber" not in st.session_state:
+    st.session_state.is_subscriber = False
 
-st.sidebar.markdown("---")
-st.sidebar.markdown(f"**Налични кредити:** {st.session_state.credits}")
+# Странично меню за управление, абонаменти и EasyPay
+st.sidebar.header("🔐 Достъп и Плащане")
 
-# Основно поле за въвеждане на думата
-keyword_input = st.text_input("Въведи дума (напр. Палачинки, Ремонти, Адвокат...):", placeholder="напр. Ремонти")
+# Администраторски вход (за теб - напълно безплатно и неограничено)
+admin_pass_input = st.sidebar.text_input("Администраторски код (за теб):", type="password")
+# Можеш да смениш тази парола с каквато пожелаеш
+if admin_pass_input == "tsvetelina2026": 
+    st.session_state.is_admin = True
+    st.sidebar.success("✅ Влязъл си като Администратор (Неограничен безплатен достъп)!")
 
-if st.button("✨ Създай всичко с едно докосване"):
-    if not keyword_input:
-        st.warning("Моля, въведи поне една дума!")
-    elif st.session_state.credits <= 0:
-        st.error("Нямаш налични кредити! Моля, зареди през EasyPay в страничното меню.")
-    else:
-        with st.spinner("Marketor анализира и генерира твоя пакет... Моля, изчакай секунда."):
-            result = generate_business_package(keyword_input)
-            
-            st.session_state.credits -= 1 # Взимаме 1 кредит при успешна генерация
-            
-            st.success("Готово! Ето Вашият All-in-One пакет:")
-            
-            st.subheader("📌 Описание на продукта / услугата")
-            st.write(result["product_description"])
-            
-            st.subheader("📱 Рекламни публикации за социални мрежи")
-            for post in result["social_media_posts"]:
-                st.info(post)
+if not st.session_state.is_admin:
+    st.sidebar.markdown("---")
+    st.sidebar.markdown("### 💳 Плащане през EasyPay")
+    st.sidebar.info(
+        "**Как да получиш достъп:**\n"
+        "1. Направи превод по твоето EasyPay.\n"
+        "2. Получи своя уникален код за достъп.\n"
+        "3. Въведи го по-долу:"
+    )
+    
+    # Поле за въвеждане на код от клиент
+    client_code = st.sidebar.text_input("Въведи код за достъп:")
+    
+    # Тук можеш да зададеш валидни кодове или да ги проверяваш
+    valid_codes = ["MARKETOR2026", "VIP-CLIENT", "EASYPAY-100"] 
+    
+    if st.sidebar.button("Активирай код"):
+        if client_code in valid_codes:
+            st.session_state.is_subscriber = True
+            st.sidebar.success("✅ Успешен абонамент! Добре дошъл!")
+        else:
+            st.sidebar.error("❌ Невалиден код за достъп.")
+
+# Проверка дали потребителят има права да ползва софтуера
+has_access = st.session_state.is_admin or st.session_state.is_subscriber
+
+if not has_access:
+    st.warning("🔒 **Този софтуер е достъпен само за активни абонати или клиенти на нашата платформа.** Моля, въведи код за достъп от лявото меню или се свържи с нас за плащане през EasyPay.")
+else:
+    if st.session_state.is_admin:
+        st.info("👑 Работиш в администраторски режим (Неограничени безплатни генерации).")
+    
+    # Основно поле за въвеждане на думата
+    keyword_input = st.text_input("Въведи дума (напр. Палачинки, Ремонти, Адвокат...):", placeholder="напр. Ремонти")
+
+    if st.button("✨ Създай всичко с едно докосване"):
+        if not keyword_input:
+            st.warning("Моля, въведи поне една дума!")
+        else:
+            with st.spinner("Marketor анализира и генерира твоя пакет... Моля, изчакай секунда."):
+                result = generate_business_package(keyword_input)
                 
-            st.subheader("🎬 Сценарий за видео (Reels / TikTok)")
-            st.text(result["video_script"])
-            
-            st.subheader("🎯 Маркетинг стратегия")
-            st.write(result["marketing_strategy"])
+                st.success("Готово! Ето Вашият All-in-One пакет:")
+                
+                st.subheader("📌 Описание на продукта / услугата")
+                st.write(result["product_description"])
+                
+                st.subheader("📱 Рекламни публикации за социални мрежи")
+                for post in result["social_media_posts"]:
+                    st.info(post)
+                    
+                st.subheader("🎬 Сценарий за видео (Reels / TikTok)")
+                st.text(result["video_script"])
+                
+                st.subheader("🎯 Маркетинг стратегия")
+                st.write(result["marketing_strategy"])
